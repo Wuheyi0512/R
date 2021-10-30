@@ -1,0 +1,74 @@
+install.packages("sampling")
+library(sampling)
+
+queslist$城市等级 <- as.factor(queslist$城市等级)
+#按比例抽取两万
+#三个城市级样本数分别为：5572,5572,8856
+smp <- strata(queslist,stratanames = c("城市等级"),
+              size = c(5572,5572,8856),
+              description = TRUE)
+table(smp$Stratum)
+n <- getdata(queslist,smp)[,-c(13:15)]
+
+
+#第一批
+smp <- strata(n,stratanames = c("城市等级"),
+              size = c(1363,1363,2274),
+              description = TRUE)
+
+table(smp$Stratum)
+
+grp1 <- getdata(n,smp)[,-c(13:15)]
+
+write.table(grp1,file = "clipboard-1024",sep="\t",col.name=TRUE,row.names=FALSE)
+
+#第二批
+n <- n[n$呱号 %in% setdiff(n$呱号,grp1$呱号),]
+n
+
+smp <- strata(n,stratanames = c("城市等级"),
+              size = c(1363,1363,2274),
+              description = FALSE)
+table(smp$Stratum)
+grp2 <- getdata(n,smp)[,-c(13:15)]
+grp2
+write.table(grp2,file = "clipboard-1024",sep="\t",col.name=TRUE,row.names=FALSE)
+
+
+#验证和第一组是否有重合
+intersect(n$呱号,grp3$呱号)
+
+#第三批
+n <- n[n$呱号 %in% setdiff(n$呱号,grp2$呱号),]
+n
+
+smp <- strata(n,stratanames = c("城市等级"),
+              size = c(1363,1363,2274),
+              description = FALSE)
+table(smp$Stratum)
+grp3 <- getdata(n,smp)[,-c(13:15)]
+grp3
+write.table(grp3,file = "clipboard-1024",sep="\t",col.name=TRUE,row.names=FALSE)
+
+
+#第四批
+n <- n[n$呱号 %in% setdiff(n$呱号,grp3$呱号),]
+n
+
+table(n$城市等级)
+write.table(n,file = "clipboard-1024",sep="\t",col.name=TRUE,row.names=FALSE)
+
+smp <- strata(n,stratanames = c("城市等级"),
+              size = c(1363,1363,2274),
+              description = FALSE)
+table(smp$Stratum)
+grp4 <- getdata(n,smp)[,-c(12:15)]
+grp4
+
+#第三批
+ba4 <- as.data.frame(n$呱号)
+ba4$var2 <- "vj"
+ba4$var3 <- "PObpDH3"
+ba4$var4 <- ba4$`n$呱号`
+ba4
+write.table(ba4,file = "clipboard-1024",sep="\t",col.name=FALSE,row.names=FALSE)
