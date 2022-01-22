@@ -1,0 +1,153 @@
+#数据导入和准备工作
+hfnet <- read.csv("hf_name.csv",row.names = 1)
+hf_net <- network(hfnet,matrix.type="adjacency")
+ver_attri <- read.csv("vertice.csv",row.names = 1)
+
+set.vertex.attribute(hf_net,"genre",ver_attri[,1])
+set.vertex.attribute(hf_net,"area",ver_attri[,2])
+set.vertex.attribute(hf_net,"year",ver_attri[,3])
+
+rescale <- function(nchar,low,high) { 
+  min_d <- min(nchar)
+  max_d <- max(nchar)
+  rscl <- ((high-low)*(nchar-min_d))/(max_d-min_d)+low
+  rscl
+}
+
+#整体情况
+
+deg <- degree(hf_net,gmode="graph")
+node_size <- rescale(deg,5,17)
+plot(hf_net,vertex.cex=node_size*0.3,displaylabels=T,
+     usearrows=FALSE,vertex.col="Orange",
+     label.pos=5,label.cex=0.4,
+     mode = "fruchtermanreingold",
+     main = "Overview")
+
+
+#地区差异
+library(RColorBrewer)
+pal <- brewer.pal(4,"PRGn")
+deg <- degree(hf_net,gmode="graph")
+node_size <- rescale(deg,5,17)
+areacat <- as.factor(get.vertex.attribute(hf_net,"area"))
+
+plot(hf_net,vertex.cex=node_size*0.3,usearrows=FALSE,vertex.col=pal[areacat],
+     displaylabels=TRUE,label.pos=5,label.cex=0.44,
+     main = "Dgree Centrality & Producing Area")
+
+legend("bottomleft",legend=c("North America","Europe","East Asia","Southeast Asia"),
+       col=pal,pch=19,
+       pt.cex=1.8,bty="n",
+       title="Producing Area")
+
+
+
+#类型被引
+#1 mystery
+mystery <- get.inducedSubgraph(hf_net, 
+which(hf_net %v% "genre" == "1"))
+degm <- degree(mystery,gmode="graph")
+sizem <- rescale(degree(mystery),1,8)
+gplot(mystery,gmode="digraph",edge.col="grey80",
+    vertex.cex=log(sizem)+1.5,
+    displaylabels=T,
+    label.pos=5.5,label.cex=0.6,
+    vertex.col=rgb(112,153,000,maxColorValue=255),
+    mode='fruchtermanreingold',
+    main='Genre:Mystery')
+
+#2 Religion
+religion <- get.inducedSubgraph(hf_net, 
+which(hf_net %v% "genre" == "2"))
+degr <- degree(religion,gmode = "graph")
+sizer <- rescale(degree(religion),1,7)
+gplot(religion,gmode="digraph",edge.col="grey80",
+      vertex.cex=log(sizer)+1.8,
+      displaylabels=T,
+      label.pos=5.5,label.cex=0.9,
+      vertex.col=rgb(255,210,048,maxColorValue=255),
+      mode='fruchtermanreingold',
+      main='Genre:Religion')
+
+#3 Monster
+monster <- get.inducedSubgraph(hf_net, 
+which(hf_net %v% "genre" == "3"))
+degmon <- degree(monster,gmode = "graph")
+sizemon <- rescale(degree(monster),1,4)
+gplot(monster,gmode="digraph",edge.col="grey80",
+      vertex.cex=log(sizemon)+1.8,
+      displaylabels=T,
+      label.pos=5.5,label.cex=0.6,
+      vertex.col=rgb(237,143,117,maxColorValue=255),
+      mode='kamadakawai',
+      main='Genre:Monster')
+
+#4 Psychology
+psychology <- get.inducedSubgraph(hf_net, 
+which(hf_net %v% "genre" == "4"))
+degpsy <- degree(psychology,gmode = "graph")
+sizepsy <- rescale(degree(psychology),1,2)
+gplot(psychology,gmode="digraph",edge.col="grey80",
+      vertex.cex=log(sizepsy)+1.8,
+      displaylabels=T,
+      label.pos=5,label.cex=0.8,
+      vertex.col=rgb(175,142,237,maxColorValue=255),
+      mode='kamadakawai',
+      main='Genre:Psychology')
+
+#5 Crime
+crime <- get.inducedSubgraph(hf_net,
+which(hf_net %v% "genre" == "5"))
+degcri <- degree(crime,gmode = "graph")
+sizecri <- rescale(degree(crime),1,4)
+gplot(crime,gmode="digraph",edge.col="grey80",
+      vertex.cex=log(sizecri)+1.8,
+      displaylabels=T,
+      label.pos=5,label.cex=0.8,
+      vertex.col=rgb(109,182,242,maxColorValue=255),
+      mode='fruchtermanreingold',
+      main='Genre:Crime')
+
+#6 Sci-Fi
+scifi <- get.inducedSubgraph(hf_net,
+which(hf_net %v% "genre" == "6"))
+degsci <- degree(scifi,gmode = "graph")
+sizesci <- rescale(degree(scifi),1,2)
+gplot(scifi,gmode="digraph",edge.col="grey80",
+      vertex.cex=log(sizesci)+1.8,
+      displaylabels=T,
+      label.pos=5,label.cex=0.8,
+      vertex.col=rgb(093,210,202,maxColorValue=255),
+      mode='kamadakawai',
+      main='Genre:Sci-Fi')
+
+#年份
+pal2 <- brewer.pal(3,"Paired")
+yearcat <- as.factor(get.vertex.attribute(hf_net,"year"))
+plot(hf_net,vertex.cex=node_size*0.3,displaylabels=T,
+     usearrows=FALSE,vertex.col=pal2[yearcat],
+     label.pos=5,label.cex=0.4,
+     mode = "fruchtermanreingold",
+     main = "Degree Centrality & Producing Time")
+legend("topright",legend=c("before 2000","2000 to 2009","2010 to 2018"),
+       col=pal2,pch=19,
+       pt.cex=2,bty="n",
+       title="Time Group")
+
+yeardat <- read.csv("year.csv",row.names = 1)
+year <- network(yeardat,matrix.type="adjacency",
+                ignore.eval=FALSE,names.eval="cite")
+icite <- year %e% "cite"
+plot(year,directed=TRUE,
+vertex.cex=10,vertex.col=pal2,
+usearrow = TRUE,displaylabels=T,
+label.pos=5,label.cex=1.5,
+edge.label = T,
+edge.lwd=icite*0.1+1.97,
+mode = 'circle',
+main = "Reference Between Different Time Groups")
+legend("bottomright",legend=c("Y1:before 2000","Y2:2000 to 2009","Y3:2010 to 2018"),
+col=pal2,pch=19,
+pt.cex=2,bty="n",
+title="Time Group")
